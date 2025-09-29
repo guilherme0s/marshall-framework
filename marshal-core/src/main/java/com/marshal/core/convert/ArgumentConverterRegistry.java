@@ -16,7 +16,7 @@ public interface ArgumentConverterRegistry {
      * @param type The class of the type.
      * @param converter The converter instance.
      */
-    <T> void register(Class<T> type, ArgumentConverter<T> converter);
+    <T> void register(Class<T> type, ArgumentConverter<?, T> converter);
 
     /**
      * Retrieves the {@link ArgumentConverter} for a given type.
@@ -26,5 +26,5 @@ public interface ArgumentConverterRegistry {
      * @return The registered converter for the given type, or {@code null} if none is found.
      */
     @Nullable
-    <T> ArgumentConverter<T> find(Class<T> type);
+    <T> ArgumentConverter<?, T> find(Class<T> type);
 }

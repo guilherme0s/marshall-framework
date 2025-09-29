@@ -2,8 +2,8 @@ package com.marshal.core.parser;
 
 import com.marshal.core.Command;
 import com.marshal.core.Argument;
+import com.marshal.core.context.CommandContext;
 import com.marshal.core.convert.ArgumentConverterRegistry;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,12 +21,15 @@ class DefaultCommandParserTest {
     private ArgumentConverterRegistry converterRegistry;
 
     @InjectMocks
-    private DefaultCommandParser parser;
+    private DefaultCommandParser<Object> parser;
+
+    // A generic context for tests that don't depend on a specific sender type.
+    private final CommandContext<Object> testContext = new CommandContext<>(new Object());
 
     @Test
     void shouldParseCommandWithNoArguments() {
         Command cmd = Command.newBuilder("help").build();
-        CommandParseResult result = parser.parse(cmd, new String[]{});
+        CommandParseResult result = parser.parse(testContext, cmd, new String[]{});
 
         assertThat(result).isNotNull();
         assertThat(result.selectedCommand()).isSameAs(cmd);
@@ -36,13 +39,13 @@ class DefaultCommandParserTest {
 
     @Test
     void shouldParseSubcommandPathAndConvertArgument() {
-        when(converterRegistry.find(Integer.class)).thenReturn(Integer::valueOf);
+        when(converterRegistry.find(Integer.class)).thenReturn((ctx, input) -> Integer.valueOf(input));
 
-        Argument<@NonNull Integer> arg = Argument.newBuilder("id", Integer.class).build();
+        Argument<Integer> arg = Argument.newBuilder("id", Integer.class).build();
         Command sub = Command.newBuilder("sub").addArgument(arg).build();
         Command root = Command.newBuilder("root").addSubCommand(sub).build();
 
-        CommandParseResult result = parser.parse(root, new String[]{"sub", "42"});
+        CommandParseResult result = parser.parse(testContext, root, new String[]{"sub", "42"});
 
         assertThat(result.selectedCommand()).isSameAs(sub);
         assertThat(result.path()).containsExactly(root, sub);
@@ -57,7 +60,7 @@ class DefaultCommandParserTest {
                         .build())
                 .build();
 
-        CommandParseResult result = parser.parse(root, new String[]{});
+        CommandParseResult result = parser.parse(testContext, root, new String[]{});
 
         assertThat(result.parameters().get("name").asString()).isEqualTo("John");
     }
@@ -69,7 +72,7 @@ class DefaultCommandParserTest {
                 .addArgument(Argument.newBuilder("name", String.class).build())
                 .build();
 
-        assertThatThrownBy(() -> parser.parse(root, new String[0]))
+        assertThatThrownBy(() -> parser.parse(testContext, root, new String[0]))
                 .isInstanceOf(MissingRequiredArgumentException.class)
                 .hasFieldOrPropertyWithValue("command", root)
                 .hasFieldOrPropertyWithValue("missingArgument", root.getArguments().getFirst());
@@ -77,21 +80,21 @@ class DefaultCommandParserTest {
 
     @Test
     void shouldThrowWhenTooManyArgumentsProvided() {
-        when(converterRegistry.find(String.class)).thenReturn(input -> input);
+        when(converterRegistry.find(String.class)).thenReturn((ctx, input) -> input);
 
         Command root = Command.newBuilder("root")
                 .addArgument(Argument.newBuilder("a", String.class).build())
                 .build();
 
-        assertThatThrownBy(() -> parser.parse(root, new String[]{"one", "two"}))
+        assertThatThrownBy(() -> parser.parse(testContext, root, new String[]{"one", "two"}))
                 .isInstanceOf(TooManyArgumentsProvidedException.class)
                 .hasFieldOrPropertyWithValue("command", root);
     }
 
     @Test
     void shouldParseCommandWithMultipleArgumentsRequiredAndOptional() {
-        when(converterRegistry.find(String.class)).thenReturn(input -> input);
-        when(converterRegistry.find(Integer.class)).thenReturn(Integer::valueOf);
+        when(converterRegistry.find(String.class)).thenReturn((ctx, input) -> input);
+        when(converterRegistry.find(Integer.class)).thenReturn((ctx, input) -> Integer.valueOf(input));
 
         Command root = Command.newBuilder("root")
                 .addArgument(Argument.newBuilder("name", String.class).build())
@@ -101,12 +104,12 @@ class DefaultCommandParserTest {
                         .build())
                 .build();
 
-        CommandParseResult result1 = parser.parse(root, new String[]{"Alice", "25", "NewYork"});
+        CommandParseResult result1 = parser.parse(testContext, root, new String[]{"Alice", "25", "NewYork"});
         assertThat(result1.parameters().get("name").asString()).isEqualTo("Alice");
         assertThat(result1.parameters().get("age").asInteger()).isEqualTo(25);
         assertThat(result1.parameters().get("city").asString()).isEqualTo("NewYork");
 
-        CommandParseResult result2 = parser.parse(root, new String[]{"Bob", "30"});
+        CommandParseResult result2 = parser.parse(testContext, root, new String[]{"Bob", "30"});
         assertThat(result2.parameters().get("name").asString()).isEqualTo("Bob");
         assertThat(result2.parameters().get("age").asInteger()).isEqualTo(30);
         assertThat(result2.parameters().get("city").asString()).isEqualTo("Unknown");
@@ -118,7 +121,7 @@ class DefaultCommandParserTest {
                 .addArgument(Argument.newBuilder("name", Integer.class).build())
                 .build();
 
-        assertThatThrownBy(() -> parser.parse(command, new String[]{"7"}))
+        assertThatThrownBy(() -> parser.parse(testContext, command, new String[]{"7"}))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

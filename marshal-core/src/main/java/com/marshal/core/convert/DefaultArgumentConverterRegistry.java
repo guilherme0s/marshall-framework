@@ -10,16 +10,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultArgumentConverterRegistry implements ArgumentConverterRegistry {
 
-    private final Map<Class<?>, ArgumentConverter<?>> converters = new ConcurrentHashMap<>();
+    private final Map<Class<?>, ArgumentConverter<?, ?>> converters = new ConcurrentHashMap<>();
 
     @Override
-    public <T> void register(Class<T> type, ArgumentConverter<T> converter) {
+    public <T> void register(final Class<T> type, final ArgumentConverter<?, T> converter) {
         converters.put(type, converter);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> @Nullable ArgumentConverter<T> find(Class<T> type) {
-        return (ArgumentConverter<T>) converters.get(type);
+    public <T> @Nullable ArgumentConverter<?, T> find(final Class<T> type) {
+        return (ArgumentConverter<?, T>) converters.get(type);
     }
 }

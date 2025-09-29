@@ -3,6 +3,7 @@ package com.marshal.core.parser;
 import com.marshal.core.Command;
 import com.marshal.core.Argument;
 import com.marshal.core.convert.ArgumentConverter;
+import com.marshal.core.context.CommandContext;
 import com.marshal.core.convert.ArgumentConverterRegistry;
 
 import java.util.ArrayDeque;
@@ -17,31 +18,31 @@ import java.util.List;
  * <p>This parser resolves subcommands greedily and then parses the remaining tokens as arguments
  * for the final command.
  */
-public class DefaultCommandParser implements CommandParser {
+public class DefaultCommandParser<C> implements CommandParser<C> {
 
     private final ArgumentConverterRegistry converterRegistry;
 
-    public DefaultCommandParser(ArgumentConverterRegistry converterRegistry) {
+    public DefaultCommandParser(final ArgumentConverterRegistry converterRegistry) {
         this.converterRegistry = converterRegistry;
     }
 
     @Override
-    public CommandParseResult parse(Command rootCommand, String[] args) {
+    public CommandParseResult parse(final CommandContext<C> context, final Command rootCommand, final String[] args) {
         Deque<String> tokens = new ArrayDeque<>(Arrays.asList(args));
 
         List<Command> path = resolveCommandPath(rootCommand, tokens);
         Command target = path.getLast();
 
-        CommandParameters parameters = parseArguments(target, tokens);
+        CommandParameters parameters = parseArguments(context, target, tokens);
 
         return new CommandParseResult(path, parameters);
     }
 
     /**
-     * Resolves the command path by traversing subcommands.
-     * Uses greedy matching: consumes as many subcommands as possible.
+     * Resolves the command path by traversing subcommands. Uses greedy matching: consumes as many subcommands as
+     * possible.
      */
-    private List<Command> resolveCommandPath(Command root, Deque<String> inputs) {
+    private List<Command> resolveCommandPath(final Command root, final Deque<String> inputs) {
         List<Command> path = new ArrayList<>();
         Command current = root;
         path.add(current);
@@ -62,7 +63,9 @@ public class DefaultCommandParser implements CommandParser {
         return path;
     }
 
-    private CommandParameters parseArguments(Command command, Deque<String> tokens) {
+    private CommandParameters parseArguments(final CommandContext<C> context, final Command command,
+            final Deque<String> tokens) {
+
         CommandParameters parameters = new CommandParameters();
 
         for (Argument<?> argument : command.getArguments()) {
@@ -75,7 +78,7 @@ public class DefaultCommandParser implements CommandParser {
                 }
             } else {
                 String token = tokens.poll();
-                Object value = convertArgument(token, argument);
+                Object value = convertArgument(context, token, argument);
                 parameters.put(argument.getName(), value);
             }
         }
@@ -87,13 +90,14 @@ public class DefaultCommandParser implements CommandParser {
         return parameters;
     }
 
-    private <T> T convertArgument(String input, Argument<T> argument) {
-        ArgumentConverter<T> converter = converterRegistry.find(argument.getType());
+    @SuppressWarnings("unchecked")
+    private <T> T convertArgument(final CommandContext<C> context, final String input, final Argument<T> argument) {
+        ArgumentConverter<?, T> converter = converterRegistry.find(argument.getType());
 
         if (converter == null) {
             throw new IllegalStateException("No converter registered for type: " + argument.getType().getSimpleName());
         }
 
-        return converter.convert(input);
+        return ((ArgumentConverter<C, T>) converter).convert(context, input);
     }
 }

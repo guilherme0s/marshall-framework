@@ -7,19 +7,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public final class CommandParameters {
 
     private final Map<String, Object> internalMap = new LinkedHashMap<>();
 
-    public <T> void put(String key, T value) {
+    public <T> void put(final String key, final T value) {
         internalMap.put(key, value);
     }
 
-    public boolean has(String key) {
+    public boolean has(final String key) {
         return internalMap.containsKey(key);
     }
 
-    public ParameterValue get(String key) {
+    public ParameterValue get(final String key) {
         return new ParameterValue(internalMap.get(key));
     }
 
@@ -35,7 +36,7 @@ public final class CommandParameters {
 
         private final @Nullable Object value;
 
-        private ParameterValue(@Nullable Object value) {
+        private ParameterValue(@Nullable final Object value) {
             this.value = value;
         }
 
@@ -55,7 +56,7 @@ public final class CommandParameters {
             return as(Boolean.class);
         }
 
-        public <T> T as(Class<T> type) {
+        public <T> T as(final Class<T> type) {
             Objects.requireNonNull(value,
                     "Cannot convert a null parameter. Check for presence first or provide a default.");
             return type.cast(value);
