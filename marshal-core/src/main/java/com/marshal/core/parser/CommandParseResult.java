@@ -1,8 +1,8 @@
 package com.marshal.core.parser;
 
-import com.marshal.core.Command;
-
 import java.util.List;
+
+import com.marshal.core.Command;
 
 /**
  * Represents the successful result of a command parsing operation.

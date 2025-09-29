@@ -1,17 +1,17 @@
 package com.marshal.core;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Represents a command that can be executed.
  * <p>
- * A command has a unique name, an optional description, a list of aliases,
- * a sequence of arguments, and a map of subcommands.
+ * A command has a unique name, an optional description, a list of aliases, a sequence of arguments, and a map of
+ * subcommands.
  * <p>
  * Instances of this interface are immutable and should be created using the {@link Builder}.
  */
@@ -68,7 +68,7 @@ public interface Command {
      * @return the subcommand, or {@code null} if not found
      */
     @Nullable
-    default Command getSubCommand(String name) {
+    default Command getSubCommand(final String name) {
         return getSubCommands().get(name.toLowerCase());
     }
 
@@ -78,14 +78,14 @@ public interface Command {
      * @param name the primary name of the command
      * @return a new {@link Builder} instance
      */
-    static Command.Builder newBuilder(String name) {
+    static Command.Builder newBuilder(final String name) {
         return new Command.Builder(name);
     }
 
     /**
      * A default, immutable implementation of the {@link Command} interface.
      */
-    class DefaultCommand implements Command {
+    final class DefaultCommand implements Command {
 
         private final String name;
         private final @Nullable String description;
@@ -94,7 +94,7 @@ public interface Command {
         private final List<Argument<?>> arguments;
         private final Map<String, Command> subCommands;
 
-        private DefaultCommand(Command.Builder builder) {
+        private DefaultCommand(final Command.Builder builder) {
             this.name = builder.name;
             this.description = builder.description;
             this.executor = builder.executor;
@@ -137,7 +137,7 @@ public interface Command {
     /**
      * A builder for creating immutable {@link Command} instances.
      */
-    class Builder {
+    final class Builder {
 
         private final String name;
         private @Nullable String description;
@@ -146,7 +146,7 @@ public interface Command {
         private final List<Argument<?>> arguments = new ArrayList<>();
         private final Map<String, Command> subCommands = new HashMap<>();
 
-        private Builder(String name) {
+        private Builder(final String name) {
             this.name = name;
         }
 
@@ -156,7 +156,7 @@ public interface Command {
          * @param description a brief explanation of the command's purpose
          * @return this builder instance for chaining
          */
-        public Builder description(String description) {
+        public Builder description(final String description) {
             this.description = description;
             return this;
         }
@@ -167,7 +167,7 @@ public interface Command {
          * @param aliases alternative names for the command
          * @return this builder instance for chaining
          */
-        public Builder aliases(String... aliases) {
+        public Builder aliases(final String... aliases) {
             this.aliases.addAll(List.of(aliases));
             return this;
         }
@@ -178,7 +178,7 @@ public interface Command {
          * @param executor the action to be performed when the command is executed
          * @return this builder instance for chaining
          */
-        public Builder executes(CommandExecutor executor) {
+        public Builder executes(final CommandExecutor executor) {
             this.executor = executor;
             return this;
         }
@@ -186,21 +186,20 @@ public interface Command {
         /**
          * Adds an argument to the command's signature.
          * <p>
-         * Arguments must be added in order. All required arguments must be added
-         * before any optional arguments.
+         * Arguments must be added in order. All required arguments must be added before any optional arguments.
          *
          * @param argument the argument to add
          * @param <T> the type of the argument's value
          * @return this builder instance for chaining
          * @throws IllegalStateException if a required argument is added after an optional one.
          */
-        public <T> Builder addArgument(Argument<T> argument) {
+        public <T> Builder addArgument(final Argument<T> argument) {
             if (argument.isRequired() && !arguments.isEmpty()) {
                 Argument<?> lastArgument = arguments.getLast();
                 if (!lastArgument.isRequired()) {
                     throw new IllegalStateException(
-                            "Cannot add a required argument '" + argument.getName() +
-                                    "' after an optional argument '" + lastArgument.getName() + "'.");
+                            "Cannot add a required argument '" + argument.getName()
+                                    + "' after an optional argument '" + lastArgument.getName() + "'.");
                 }
             }
             this.arguments.add(argument);
@@ -214,10 +213,10 @@ public interface Command {
          *
          * @param subCommand the subcommand to add
          * @return this builder instance for chaining
-         * @throws IllegalArgumentException if the subcommand's name or any of its aliases
-         * conflict with an already registered subcommand.
+         * @throws IllegalArgumentException if the subcommand's name or any of its aliases conflict with an
+         *         already registered subcommand.
          */
-        public Builder addSubCommand(Command subCommand) {
+        public Builder addSubCommand(final Command subCommand) {
             final List<String> allNames = new ArrayList<>();
             allNames.add(subCommand.getName().toLowerCase());
             for (String alias : subCommand.getAliases()) {

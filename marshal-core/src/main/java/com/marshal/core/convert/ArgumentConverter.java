@@ -1,8 +1,8 @@
 package com.marshal.core.convert;
 
+import com.marshal.core.CommandExecutor;
 import com.marshal.core.context.CommandContext;
 import com.marshal.core.parser.CommandParser;
-import com.marshal.core.CommandExecutor;
 
 /**
  * A strategy interface for converting a raw string argument into a specific object type.

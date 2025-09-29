@@ -1,11 +1,11 @@
 package com.marshal.core.parser;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public final class CommandParameters {

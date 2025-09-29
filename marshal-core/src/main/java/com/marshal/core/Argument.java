@@ -50,7 +50,7 @@ public interface Argument<T> {
      * @param <T> the type of the argument
      * @return a new {@link Builder} instance
      */
-    static <T> Argument.Builder<T> newBuilder(String name, Class<T> type) {
+    static <T> Argument.Builder<T> newBuilder(final String name, final Class<T> type) {
         return new Argument.Builder<>(name, type);
     }
 
@@ -59,13 +59,13 @@ public interface Argument<T> {
      *
      * @param <T> the type of the argument's value
      */
-    class DefaultArgument<T> implements Argument<T> {
+    final class DefaultArgument<T> implements Argument<T> {
 
         private final String name;
         private final Class<T> type;
         private final @Nullable T defaultValue;
 
-        private DefaultArgument(Argument.Builder<T> builder) {
+        private DefaultArgument(final Argument.Builder<T> builder) {
             this.name = builder.name;
             this.type = builder.type;
             this.defaultValue = builder.defaultValue;
@@ -92,7 +92,7 @@ public interface Argument<T> {
      *
      * @param <T> the type of the argument's value
      */
-    class Builder<T> {
+    final class Builder<T> {
 
         private final String name;
         private final Class<T> type;
@@ -104,7 +104,7 @@ public interface Argument<T> {
          * @param name the name of the argument
          * @param type the expected class of the argument's value
          */
-        private Builder(String name, Class<T> type) {
+        private Builder(final String name, final Class<T> type) {
             this.name = name;
             this.type = type;
         }
@@ -117,7 +117,7 @@ public interface Argument<T> {
          * @param defaultValue the value to use when the user does not provide the argument
          * @return this builder instance for chaining
          */
-        public Builder<T> defaultValue(T defaultValue) {
+        public Builder<T> defaultValue(final T defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
