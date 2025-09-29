@@ -218,19 +218,22 @@ public interface Command {
          * conflict with an already registered subcommand.
          */
         public Builder addSubCommand(Command subCommand) {
-            String commandName = subCommand.getName().toLowerCase();
-            if (subCommands.containsKey(commandName)) {
-                throw new IllegalArgumentException("Duplicated subcommand name: " + commandName);
-            }
-            subCommands.put(commandName, subCommand);
-
+            final List<String> allNames = new ArrayList<>();
+            allNames.add(subCommand.getName().toLowerCase());
             for (String alias : subCommand.getAliases()) {
-                String lowerCaseAlias = alias.toLowerCase();
-                if (subCommands.containsKey(lowerCaseAlias)) {
+                allNames.add(alias.toLowerCase());
+            }
+
+            for (String name : allNames) {
+                if (subCommands.containsKey(name)) {
                     throw new IllegalArgumentException(
-                            "Subcommand alias '" + lowerCaseAlias + "' conflicts with an existing subcommand.");
+                            "Subcommand name or alias '" + name + "' conflicts with an existing command."
+                    );
                 }
-                subCommands.put(lowerCaseAlias, subCommand);
+            }
+
+            for (String name : allNames) {
+                subCommands.put(name, subCommand);
             }
             return this;
         }
