@@ -1,5 +1,7 @@
 package com.marshal.core;
 
+import com.marshal.core.parser.CommandParameters;
+
 /**
  * Represents an action to be executed when a command is run.
  */
@@ -10,7 +12,7 @@ public interface CommandExecutor {
      * Executes the command logic.
      *
      * @param sender the entity that executed the command
-     * @param args the arguments provided for the command
+     * @param parameters the arguments provided for the command
      */
-    void execute(Object sender, String[] args);
+    void execute(Object sender, CommandParameters parameters);
 }

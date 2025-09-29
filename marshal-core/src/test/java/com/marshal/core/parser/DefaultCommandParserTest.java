@@ -31,7 +31,7 @@ class DefaultCommandParserTest {
         assertThat(result).isNotNull();
         assertThat(result.selectedCommand()).isSameAs(cmd);
         assertThat(result.path()).containsExactly(cmd);
-        assertThat(result.arguments()).isEmpty();
+        assertThat(result.parameters().isEmpty()).isTrue();
     }
 
     @Test
@@ -46,7 +46,7 @@ class DefaultCommandParserTest {
 
         assertThat(result.selectedCommand()).isSameAs(sub);
         assertThat(result.path()).containsExactly(root, sub);
-        assertThat(result.arguments()).containsEntry("id", 42);
+        assertThat(result.parameters().get("id").asInteger()).isEqualTo(42);
     }
 
     @Test
@@ -59,7 +59,7 @@ class DefaultCommandParserTest {
 
         CommandParseResult result = parser.parse(root, new String[]{});
 
-        assertThat(result.arguments()).containsEntry("name", "John");
+        assertThat(result.parameters().get("name").asString()).isEqualTo("John");
     }
 
     @Test
@@ -102,16 +102,14 @@ class DefaultCommandParserTest {
                 .build();
 
         CommandParseResult result1 = parser.parse(root, new String[]{"Alice", "25", "NewYork"});
-        assertThat(result1.arguments())
-                .containsEntry("name", "Alice")
-                .containsEntry("age", 25)
-                .containsEntry("city", "NewYork");
+        assertThat(result1.parameters().get("name").asString()).isEqualTo("Alice");
+        assertThat(result1.parameters().get("age").asInteger()).isEqualTo(25);
+        assertThat(result1.parameters().get("city").asString()).isEqualTo("NewYork");
 
         CommandParseResult result2 = parser.parse(root, new String[]{"Bob", "30"});
-        assertThat(result2.arguments())
-                .containsEntry("name", "Bob")
-                .containsEntry("age", 30)
-                .containsEntry("city", "Unknown");
+        assertThat(result2.parameters().get("name").asString()).isEqualTo("Bob");
+        assertThat(result2.parameters().get("age").asInteger()).isEqualTo(30);
+        assertThat(result2.parameters().get("city").asString()).isEqualTo("Unknown");
     }
 
     @Test

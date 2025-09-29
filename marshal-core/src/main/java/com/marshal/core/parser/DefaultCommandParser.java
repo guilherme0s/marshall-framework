@@ -9,9 +9,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The default implementation of the {@link CommandParser} interface.
@@ -34,9 +32,9 @@ public class DefaultCommandParser implements CommandParser {
         List<Command> path = resolveCommandPath(rootCommand, tokens);
         Command target = path.getLast();
 
-        Map<String, Object> parsedArguments = parseArguments(target, tokens);
+        CommandParameters parameters = parseArguments(target, tokens);
 
-        return new CommandParseResult(path, parsedArguments);
+        return new CommandParseResult(path, parameters);
     }
 
     /**
@@ -64,8 +62,8 @@ public class DefaultCommandParser implements CommandParser {
         return path;
     }
 
-    private Map<String, Object> parseArguments(Command command, Deque<String> tokens) {
-        Map<String, Object> result = new LinkedHashMap<>();
+    private CommandParameters parseArguments(Command command, Deque<String> tokens) {
+        CommandParameters parameters = new CommandParameters();
 
         for (Argument<?> argument : command.getArguments()) {
             if (tokens.isEmpty()) {
@@ -73,12 +71,12 @@ public class DefaultCommandParser implements CommandParser {
                     throw new MissingRequiredArgumentException(command, argument);
                 }
                 if (argument.getDefaultValue() != null) {
-                    result.put(argument.getName(), argument.getDefaultValue());
+                    parameters.put(argument.getName(), argument.getDefaultValue());
                 }
             } else {
                 String token = tokens.poll();
                 Object value = convertArgument(token, argument);
-                result.put(argument.getName(), value);
+                parameters.put(argument.getName(), value);
             }
         }
 
@@ -86,7 +84,7 @@ public class DefaultCommandParser implements CommandParser {
             throw new TooManyArgumentsProvidedException(command);
         }
 
-        return result;
+        return parameters;
     }
 
     private <T> T convertArgument(String input, Argument<T> argument) {

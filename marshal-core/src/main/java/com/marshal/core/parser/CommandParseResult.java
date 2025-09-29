@@ -9,9 +9,9 @@ import java.util.Map;
  * Represents the successful result of a command parsing operation.
  *
  * @param path The sequence of commands from the root to the selected subcommand.
- * @param arguments A map of parsed argument names to their converted values.
+ * @param parameters A map of parsed argument names to their converted values.
  */
-public record CommandParseResult(List<Command> path, Map<String, Object> arguments) {
+public record CommandParseResult(List<Command> path, CommandParameters parameters) {
 
     /**
      * Gets the final, most specific command resolved from the input.
