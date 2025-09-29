@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 class DefaultCommandParserTest {
 
     @Mock
-    private ArgumentConverterRegistry converterRegistry;
+    private ArgumentConverterRegistry<Object> converterRegistry;
 
     @InjectMocks
     private DefaultCommandParser<Object> parser;

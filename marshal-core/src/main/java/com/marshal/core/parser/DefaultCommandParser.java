@@ -20,9 +20,9 @@ import java.util.List;
  */
 public class DefaultCommandParser<C> implements CommandParser<C> {
 
-    private final ArgumentConverterRegistry converterRegistry;
+    private final ArgumentConverterRegistry<C> converterRegistry;
 
-    public DefaultCommandParser(final ArgumentConverterRegistry converterRegistry) {
+    public DefaultCommandParser(final ArgumentConverterRegistry<C> converterRegistry) {
         this.converterRegistry = converterRegistry;
     }
 
@@ -90,14 +90,13 @@ public class DefaultCommandParser<C> implements CommandParser<C> {
         return parameters;
     }
 
-    @SuppressWarnings("unchecked")
     private <T> T convertArgument(final CommandContext<C> context, final String input, final Argument<T> argument) {
-        ArgumentConverter<?, T> converter = converterRegistry.find(argument.getType());
+        ArgumentConverter<C, T> converter = converterRegistry.find(argument.getType());
 
         if (converter == null) {
             throw new IllegalStateException("No converter registered for type: " + argument.getType().getSimpleName());
         }
 
-        return ((ArgumentConverter<C, T>) converter).convert(context, input);
+        return converter.convert(context, input);
     }
 }

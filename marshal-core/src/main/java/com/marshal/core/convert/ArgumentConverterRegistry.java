@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>This allows for registering and retrieving converters for different types.
  */
-public interface ArgumentConverterRegistry {
+public interface ArgumentConverterRegistry<C> {
 
     /**
      * Registers an {@link ArgumentConverter} for a specific type.
@@ -16,7 +16,7 @@ public interface ArgumentConverterRegistry {
      * @param type The class of the type.
      * @param converter The converter instance.
      */
-    <T> void register(Class<T> type, ArgumentConverter<?, T> converter);
+    <T> void register(Class<T> type, ArgumentConverter<C, T> converter);
 
     /**
      * Retrieves the {@link ArgumentConverter} for a given type.
@@ -26,5 +26,5 @@ public interface ArgumentConverterRegistry {
      * @return The registered converter for the given type, or {@code null} if none is found.
      */
     @Nullable
-    <T> ArgumentConverter<?, T> find(Class<T> type);
+    <T> ArgumentConverter<C, T> find(Class<T> type);
 }
